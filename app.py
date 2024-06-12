@@ -1,12 +1,13 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session
 import folium
 import folium.plugins as plugins
 from jinja2 import Template
 from folium.map import Marker
 from geopy.distance import distance
-from math import radians, cos, sin, atan2, sqrt, degrees
+from math import radians, cos, sin, atan2, sqrt, degrees, ceil, floor
 
 app = Flask(__name__)
+app.secret_key = 'BAD_SECRET_KEY'
 
 locations = {'2357': [1.3428501826653902, 103.68000869738859], '1125': [1.354337, 103.684495], '3073': [1.3430637978922473, 103.68270773978031]
              , '5781': [1.3426374150718514, 103.68248648102774], '7320': [1.3543630333902696, 103.687998625503], '2232': [1.3445351444618483, 103.68029557491711]
@@ -21,12 +22,10 @@ locations = {'2357': [1.3428501826653902, 103.68000869738859], '1125': [1.354337
              , '6270': [1.3485072973819439, 103.6884057079587], '6987': [1.3490293867939036, 103.68828138752339], '7284': [1.3482555748743439, 103.68106349542785]
              , }
 
-total_points = 0
-
 @app.route("/")
 def home():
+    session['total_points'] = 0
     location_keys = list(locations.keys())
-
     return render_template("index.html", location_keys=location_keys)
 
 # @app.route("/map1")
@@ -64,8 +63,6 @@ def home():
 @app.route("/map/<loc_code>", methods = ['POST', 'GET'])
 def map(loc_code):
     if request.method == 'GET':
-        global total_points
-
         location_keys = list(locations.keys())
 
         #set the iframe dimensions
@@ -83,7 +80,7 @@ def map(loc_code):
         m.get_root().height = "600px"
         map_iframe = m.get_root()._repr_html_()
 
-        return render_template("map.html", map_iframe=map_iframe, location_keys=location_keys, total_points=total_points)
+        return render_template("map.html", map_iframe=map_iframe, location_keys=location_keys, total_points=session['total_points'])
     
     # if request.method == 'POST':
 
@@ -147,13 +144,12 @@ def data(data):
     dist_line = folium.PolyLine([locations[combined_data[2]], 
                      LatLong]).add_to(m)
     
-    dist_btwn_locs = distance(locations[combined_data[2]], LatLong)*1000
+    dist_btwn_locs = float(str(distance(locations[combined_data[2]], LatLong)*1000)[:-3])
 
-    points_earned = 1000/float(str(dist_btwn_locs)[:-2])
-    global total_points # to access the global variable for points
-    total_points = total_points + points_earned
+    points_earned = ceil(1000/float(str(dist_btwn_locs)[:-2]))
+    session['total_points'] += points_earned
 
-    dist_label = format(float(str(dist_btwn_locs)[:-2]), '2f') + "m"
+    dist_label = format(floor(dist_btwn_locs), 'd') + " m"
     attr = {'fill': '#000000', 'font-weight': 'bold', 'font-size': '15'}
     plugins.PolyLineTextPath(dist_line, dist_label, offset=-5, center=True, attributes=attr).add_to(m)
 
@@ -195,13 +191,8 @@ def map_hard(loc_code):
         # show the LongLat values on the location clicked on the map
         m.add_child(folium.LatLngPopup())
 
-
-
         m.get_root().width = "1000px"
         m.get_root().height = "600px"
         map_iframe = m.get_root()._repr_html_()
 
-        global total_points
-
-        return render_template("map_hard.html", map_iframe=map_iframe, location_keys=location_keys, total_points=total_points)
-
+        return render_template("map_hard.html", map_iframe=map_iframe, location_keys=location_keys, total_points=session['total_points'])
