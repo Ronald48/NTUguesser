@@ -20,14 +20,17 @@
             <a class="p-2 navbar-brand" href="/">NTUguesser</a>
         </div>
     </nav>
-    <div class="container p-3">
+    <div class="container p-3" style="display: flex; flex-direction: column; height: 80vh; justify-content: center; align-items: center;">
         <img style="height:500px; width:500px" src={{ "/static/images/" ~loc_code~".jpg" }} />
+        <a href={{ "/map/" ~loc_code~ ""}}><button class="btn btn-primary p-2 bg-purepink m-2">Next</button></a>
     </div>
+
+    
+
     <div class="footer_logo text-end w-100">
         <span class="resize_text"></span>
     </div>
-    <a href={{ "/map/" ~loc_code~ ""}}><button class="btn btn-primary p-2 bg-purepink m-2">Next</button></a>
-
+    
 </body>
 <script>
 document.getElementById('modalButton').onclick = function() {

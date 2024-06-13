@@ -21,6 +21,15 @@ h3{
 }
 body{
     background-color: #e8e8e8;
+    overflow: hidden;
+}
+
+#difficulty{
+    display: flex;
+    height: 80vh;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .center{
@@ -103,6 +112,8 @@ body{
 }
 
 .footer_logo{
+    position: absolute;
+    bottom: 0;
     width: 100vw;
     height: 50px;
     background-color: #F3E8DF;

@@ -24,13 +24,14 @@
     <div class="progress">
         <div class="progress-bar progress-bar-striped" role="progressbar" style="width: {{ total_points/5 }}px" aria-valuenow= {{ total_points/5 }} aria-valuemin="0" aria-valuemax="100"></div>
     </div>
-    <div class="container p-3">
+    <div class="container p-3" style="display: flex; flex-direction: column; height: 80vh; justify-content: center; align-items: center;">
         {{ map_iframe | safe}}
+        <button class="btn btn-primary p-2 bg-purepink m-2" onclick=get_photo()>Next</button>
     </div>
     <div class="footer_logo text-end w-100">
         <span class="resize_text"></span>
     </div>
-    <button class="btn btn-primary p-2 bg-purepink m-2" onclick=get_photo()>Next</button>
+    
     <span id="longitude"></span>
     <span id="latitude"></span>
     <span id="output"></span>
