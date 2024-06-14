@@ -16,7 +16,6 @@ body{
 #choice{
     display: flex;
     height: 100vh;
-    margin-top: 3rem;
     flex-direction: column;
     display: block;
     justify-content: center;
@@ -25,7 +24,18 @@ body{
     margin-top: 10rem;
 }
 
-#choice .faction_name input{
+#login{
+    display: flex;
+    height: 100vh;
+    flex-direction: column;
+    display: block;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    margin-top: 10rem;
+}
+
+.cred_input input{
     background-color: #F3E8DF;
     border: 1px solid #c99973;
     border-radius: 5px;
@@ -33,8 +43,12 @@ body{
     font-size: 1.5rem;
     padding: 0.5rem 0.7rem;
     width: 30rem;
-    margin-bottom: 4rem;
+    margin-bottom: 2rem;
     text-align: center;
+}
+
+#login button{
+    margin-top: 2rem;
 }
 
 #diff_btn{

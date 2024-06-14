@@ -21,14 +21,25 @@
         </div>
     </nav>
     <div class="container p-3">
-        <form action="{{ url_for("get_faction")}}" method="post">
-            <div id="choice">
-                <div class="faction_name">
-                    <h2>Enter Faction Name</h2>
+        <form action="{{ url_for("get_faction") }}" method="post">
+            <div id="login">
+                <div class="cred_input">
+                    <h2>Enter Username</h2>
                     <input type="text" name="f_name" placeholder="Faction Name">
+                    <h2>Enter Password</h2>
+                    <input type="password" name="pswd" placeholder="Password">
                 </div>
                 <div id="diff_btn">
-                    <button type="submit">Confirm</button>
+                    {% block content %}
+                        {% with messages = get_flashed_messages() %}
+                            {% if messages %}
+                                {% for msg in messages %}
+                                    <p style="color: #ee2020">{{msg}}</p>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+                    {% endblock %}
+                    <button type="submit">Login</button>
                 </div>
             </div>
         </form>
@@ -36,6 +47,5 @@
     <div class="footer_logo text-end w-100">
         <span class="resize_text"></span>
     </div>
-    {% set test_var = location_keys %}
 </body>
 </html>
