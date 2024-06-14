@@ -26,7 +26,7 @@ locations = {'2357': [1.3428501826653902, 103.68000869738859], '1125': [1.354337
 def home():
     if user:
         location_keys = list(locations.keys())
-        return render_template("difficulty.html", location_keys=location_keys)
+        return render_template("difficulty.html", location_keys=location_keys, user_name = user.title())
     session['total_points'] = 0
     return render_template("index.html")
 
@@ -45,7 +45,7 @@ def get_faction():
         session['total_points'] = get_data()[user_name][1]
         global user
         user = user_name
-        return render_template("difficulty.html", location_keys=location_keys)
+        return render_template("difficulty.html", location_keys=location_keys, user_name=user.title())
 
 
 @app.route("/map/<loc_code>", methods = ['POST', 'GET'])
@@ -169,6 +169,6 @@ def disp_leaders():
     
     sorted_lst.sort(key=lambda x: x[1])
     for i in sorted_lst[::-1]:
-        flash(i)
+        flash((i[0].title(), i[1]))
 
     return render_template("leaderboard.html")
