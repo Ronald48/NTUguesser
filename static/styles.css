@@ -1,16 +1,5 @@
 @charset "UTF-8";
 
-/* Hide scrollbar for Chrome, Safari and Opera */
-/* body::-webkit-scrollbar {
-    display: none;
-  } */
-  
-  /* Hide scrollbar for IE, Edge and Firefox */
-/* body{
-    -ms-overflow-style: none; 
-    scrollbar-width: none;  
-} */
-
 h3{
     font-family: Arial, Helvetica, sans-serif;
 }
@@ -24,13 +13,47 @@ body{
     overflow: hidden;
 }
 
-#difficulty{
+#choice{
     display: flex;
-    height: 80vh;
+    height: 100vh;
+    margin-top: 3rem;
     flex-direction: column;
+    display: block;
     justify-content: center;
     align-items: center;
     text-align: center;
+    margin-top: 10rem;
+}
+
+#choice .faction_name input{
+    background-color: #F3E8DF;
+    border: 1px solid #c99973;
+    border-radius: 5px;
+    height: 3rem;
+    font-size: 1.5rem;
+    padding: 0.5rem 0.7rem;
+    width: 30rem;
+    margin-bottom: 4rem;
+    text-align: center;
+}
+
+#diff_btn{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-self: center;
+}
+
+#diff_btn button{
+    margin-bottom: 1.2rem;
+    background-color: #F3E8DF;
+    border: 1px solid #c99973;
+    border-radius: 5px;
+    height: 3rem;
+    font-size: 1.5rem;
+    width: 30rem;
+    justify-items: center;
+    padding: 0.2rem 0.6rem;
 }
 
 .center{

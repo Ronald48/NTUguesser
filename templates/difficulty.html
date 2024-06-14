@@ -21,21 +21,41 @@
         </div>
     </nav>
     <div class="container p-3">
-        <form action="{{ url_for("get_faction")}}" method="post">
-            <div id="choice">
-                <div class="faction_name">
-                    <h2>Enter Faction Name</h2>
-                    <input type="text" name="f_name" placeholder="Faction Name">
-                </div>
-                <div id="diff_btn">
-                    <button type="submit">Confirm</button>
-                </div>
+        <div id="choice">
+            <div id="diff_btn">
+                <h2>Choose Difficulty</h2>
+                <button type="submit" onclick="get_photo()">Easy</button>
+                <button type="submit" onclick="get_photo_hard()">HARD!</button>
             </div>
-        </form>
+        </div>
     </div>
     <div class="footer_logo text-end w-100">
         <span class="resize_text"></span>
     </div>
     {% set test_var = location_keys %}
 </body>
+<script>
+
+// randomly pick a location and redirect the user
+function get_photo()
+{
+
+    var loc_indexes = {{location_keys|safe}}; // load the indexes of all the location photos
+
+    let randomInt1 = Math.floor(Math.random() * (loc_indexes.length)); // pick a random number in the range of loc_indexes
+    window.location.href = window.location.href + "location_photo/" + loc_indexes[randomInt1]; // redirect to the location photo for the selected location code
+    
+};
+
+function get_photo_hard()
+{
+
+    var loc_indexes = {{location_keys|safe}}; // load the indexes of all the location photos
+
+    let randomInt2 = Math.floor(Math.random() * (loc_indexes.length)); // pick a random number in the range of loc_indexes
+    window.location.href = window.location.href + "location_photo/" + loc_indexes[randomInt2] + "/2"; // redirect to the location photo for the selected location code
+    
+};
+
+</script>
 </html>

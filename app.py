@@ -25,9 +25,15 @@ locations = {'2357': [1.3428501826653902, 103.68000869738859], '1125': [1.354337
 @app.route("/")
 def home():
     session['total_points'] = 0
-    location_keys = list(locations.keys())
-    return render_template("index.html", location_keys=location_keys)
+    return render_template("index.html")
 
+@app.route('/', methods =["POST"])
+def get_faction():
+    if request.method == "POST":
+        name = request.form.get("f_name")
+        print(name)
+        location_keys = list(locations.keys())
+        return render_template("difficulty.html", location_keys=location_keys)
 # @app.route("/map1")
 # def map1():
 #     # Modify Marker template to include the onClick event
@@ -63,6 +69,9 @@ def home():
 @app.route("/map/<loc_code>", methods = ['POST', 'GET'])
 def map(loc_code):
     if request.method == 'GET':
+        name = request.form.get("f_name")
+        print(name)
+
         location_keys = list(locations.keys())
 
         #set the iframe dimensions
@@ -81,7 +90,6 @@ def map(loc_code):
         map_iframe = m.get_root()._repr_html_()
 
         return render_template("map.html", map_iframe=map_iframe, location_keys=location_keys, total_points=session['total_points'])
-    
     # if request.method == 'POST':
 
     #     LongLat = request.get_json()
