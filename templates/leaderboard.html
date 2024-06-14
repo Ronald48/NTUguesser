@@ -9,7 +9,6 @@
    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-
    <title>NTUguesser</title>
    
 </head>
@@ -17,7 +16,8 @@
     <nav class="navbar navbar-light bg-cream fw-bold">
         <div>
             <img src="/static/images/globe.svg" width="50" style="padding-left:5px"/>
-            <a class="p-2 navbar-brand" href="/">NTUguesser</a>
+            <a class="p-2 navbar-brand" href="/templates/index.html">NTUguesser</a>
+            <a class="leaderboard_btn" href="/templates/leaderboard.html"></a>
         </div>
         <div class="nav_btn">
             <a href="/">
@@ -28,21 +28,29 @@
             </a>
         </div>
     </nav>
-    <div class="container p-3" style="display: flex; flex-direction: column; height: 80vh; justify-content: center; align-items: center;">
-        <img style="height:500px; width:500px" src={{ "/static/images/" ~loc_code~".jpg" }} />
-        <a href={{ "/map/" ~loc_code~ ""}}><button class="btn btn-primary p-2 bg-purepink m-2">Next</button></a>
+    <div id="leaderboard">
+        <table>
+            <tr>
+                <th>Username</th>
+                <th>Score</th>
+            </tr>
+                {% block content %}
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            {% for uname, score in messages %}
+                                <tr>
+                                    <td>{{uname}}</td>
+                                    <td>{{score}}</td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                {% endblock %}
+        </table>
     </div>
-
-    
-
     <div class="footer_logo text-end w-100">
         <span class="resize_text"></span>
     </div>
-    
 </body>
-<script>
-document.getElementById('modalButton').onclick = function() {
-    $('#exampleModal').modal('toggle')
-}
-</script>
 </html>
+

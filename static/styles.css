@@ -157,6 +157,47 @@ body{
     background-color: #F3E8DF;
 }
 
+#leaderboard{
+    overflow: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#leaderboard table{
+    margin: 1.5rem 5rem;
+    width: 60%;
+    text-align: center;
+    font-size: 1.3rem;
+    max-height: 70vh;
+}
+
+#leaderboard th{
+    font-size: 1.5rem;
+    background-color: #c99973;
+}
+
+#leaderboard tr:nth-child(odd){
+    background-color: #f3d5bd;
+}
+
+#leaderboard tr:nth-child(even){
+    background-color: #F3E8DF;
+}
+
+
+.nav_btn a{
+    text-decoration: none;
+}
+
+.home{
+    margin-right: 2rem;
+}
+
+.leaderboard{
+    margin-right: 2rem;
+}
+
 @media (min-width: 576px) {
     .christmas_card{
         width: 75% !important;

@@ -24,6 +24,9 @@ locations = {'2357': [1.3428501826653902, 103.68000869738859], '1125': [1.354337
 
 @app.route("/")
 def home():
+    if user:
+        location_keys = list(locations.keys())
+        return render_template("difficulty.html", location_keys=location_keys)
     session['total_points'] = 0
     return render_template("index.html")
 
@@ -155,3 +158,17 @@ def map_hard(loc_code):
         map_iframe = m.get_root()._repr_html_()
 
         return render_template("map_hard.html", map_iframe=map_iframe, location_keys=location_keys, total_points=session['total_points'])
+
+
+@app.route("/leaderboard")
+def disp_leaders():
+    user_info = get_data()
+    sorted_lst = []
+    for i in user_info:
+        sorted_lst.append((i, user_info[i][1]))
+    
+    sorted_lst.sort(key=lambda x: x[1])
+    for i in sorted_lst[::-1]:
+        flash(i)
+
+    return render_template("leaderboard.html")

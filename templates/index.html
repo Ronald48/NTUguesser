@@ -19,13 +19,21 @@
             <img src="/static/images/globe.svg" width="50" style="padding-left:5px"/>
             <a class="p-2 navbar-brand" href="/">NTUguesser</a>
         </div>
+        <div class="nav_btn">
+            <a href="/">
+                <img class="home" src="/static/images/home.svg" width="50"/>
+            </a>
+            <a href="/leaderboard">
+                <img class="leaderboard" src="/static/images/leaderboard.svg" width="50"/>
+            </a>
+        </div>
     </nav>
     <div class="container p-3">
         <form action="{{ url_for("get_faction") }}" method="post">
             <div id="login">
                 <div class="cred_input">
                     <h2>Enter Username</h2>
-                    <input type="text" name="f_name" placeholder="Faction Name">
+                    <input type="text" name="f_name" placeholder="Username">
                     <h2>Enter Password</h2>
                     <input type="password" name="pswd" placeholder="Password">
                 </div>
