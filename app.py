@@ -8,15 +8,14 @@ from csv_handler import get_loc_data
 
 app = Flask(__name__)
 app.secret_key = 'BAD_SECRET_KEY'
-user = ''
 
 locations = get_loc_data()
 
 @app.route("/")
 def home():
-    if user:
+    if 'user' in session:
         location_keys = list(locations.keys())
-        return render_template("difficulty.html", location_keys=location_keys, user_name = user.title())
+        return render_template("difficulty.html", location_keys=location_keys, user_name = session['user'].title())
     session['total_points'] = 0
     return render_template("index.html")
 
@@ -33,16 +32,14 @@ def get_faction():
             return render_template("index.html")
         location_keys = list(locations.keys())
         session['total_points'] = get_data()[user_name][1]
-        global user
-        user = user_name
-        return render_template("difficulty.html", location_keys=location_keys, user_name=user.title())
+        session['user'] = user_name
+        return render_template("difficulty.html", location_keys=location_keys, user_name=session['user'].title())
 
 
 @app.route("/map/<loc_code>", methods = ['POST', 'GET'])
 def map(loc_code):
     if request.method == 'GET':
         name = request.form.get("f_name")
-        print(name)
 
         location_keys = list(locations.keys())
 
@@ -105,7 +102,7 @@ def data(data):
 
     points_earned = ceil(1000/float(str(dist_btwn_locs)[:-2]))
     session['total_points'] += points_earned
-    update_score(user, session['total_points'])
+    update_score(session['user'], session['total_points'])
     
 
     dist_label = format(floor(dist_btwn_locs), 'd') + " m"
