@@ -3,24 +3,14 @@ import folium
 import folium.plugins as plugins
 from geopy.distance import distance
 from math import radians, cos, sin, atan2, sqrt, degrees, ceil, floor
-from database_manager import check_cred, get_data, update_score
+from database_manager import check_cred, get_data, update_score, get_img_url
+from csv_handler import get_loc_data
 
 app = Flask(__name__)
 app.secret_key = 'BAD_SECRET_KEY'
 user = ''
 
-locations = {'2357': [1.3428501826653902, 103.68000869738859], '1125': [1.354337, 103.684495], '3073': [1.3430637978922473, 103.68270773978031]
-             , '5781': [1.3426374150718514, 103.68248648102774], '7320': [1.3543630333902696, 103.687998625503], '2232': [1.3445351444618483, 103.68029557491711]
-             , '4350': [1.344064, 103.681253], '0053':[1.353260, 103.681938], '0611': [1.342805, 103.680186], '0490': [1.354852, 103.685161]
-             , '0409': [1.3433272604917854, 103.67937904297112], '0271': [1.355080, 103.684446], '9839': [1.354637, 103.684121]
-             , '9736':[1.3551276581734117, 103.68477283283985], '9708': [1.342645, 103.682446], '7574': [1.344573890732655, 103.68024249467516]
-             , '2342': [1.3449737175166359, 103.67980527543415], '2573': [1.343868733946231, 103.68407336885876], '2122':[1.342594, 103.682440]
-             , '2575': [1.347729, 103.680613], '3273': [1.346123, 103.680747], '3673':[1.3424588814010432, 103.68243687619389]
-             , '4852': [1.3478507792463952, 103.6810190585185], '4385': [1.3467837383125467, 103.68088003575274], '3285': [1.342433, 103.685106]
-             , '3890': [1.344464509231369, 103.68020687747625], '3890': [1.344464509231369, 103.68020687747625], '2873': [1.3486769552055542, 103.68743311950114]
-             , '7384': [1.3429490019690558, 103.68012193301584], '6030': [1.3476890123734664, 103.68078966579428], '6250': [1.342079071592156, 103.68179564131339]
-             , '6270': [1.3485072973819439, 103.6884057079587], '6987': [1.3490293867939036, 103.68828138752339], '7284': [1.3482555748743439, 103.68106349542785]
-             , }
+locations = get_loc_data()
 
 @app.route("/")
 def home():
@@ -131,11 +121,13 @@ def data(data):
 
 @app.route("/location_photo/<loc_code>", methods = ['GET'])
 def location_photo(loc_code):
-    return render_template("location_photo.html", loc_code=loc_code)
+    url = get_img_url(loc_code)
+    return render_template("location_photo.html", url=url, loc_code=loc_code)
 
 @app.route("/location_photo/<loc_code>/2", methods = ['GET'])
 def location_photo_hard(loc_code):
-    return render_template("location_photo_hard.html", loc_code=loc_code)
+    url = get_img_url(loc_code)
+    return render_template("location_photo_hard.html", url=url, loc_code=loc_code)
 
 
 @app.route("/map/<loc_code>/2", methods = ['POST', 'GET'])

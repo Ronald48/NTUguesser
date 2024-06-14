@@ -1,15 +1,19 @@
 import firebase_admin
 from firebase_admin import credentials
-from firebase_admin import db
+from firebase_admin import db, storage
 import hashlib
 import os
+import requests
 
 cred = credentials.Certificate("firebase_cred.json")
 
 with open('dburl.txt', 'r') as file:
     url = file.read()
 
-firebase_admin.initialize_app(cred, {'databaseURL': url})
+with open("storagebucket.txt", 'r') as file:
+    store_bkt = file.read()
+
+firebase_admin.initialize_app(cred, {'databaseURL': url, 'storageBucket': store_bkt})
 ref = db.reference()
 
 def get_data():
@@ -37,3 +41,18 @@ def check_cred(user_name, pswd):
 def update_score(user_name, score):
     pswd = ref.get()[user_name][0]
     ref.update({user_name: [pswd, score]})
+
+def get_img_url(image_no):
+    bucket = storage.bucket()
+    image = bucket.blob(f'{image_no}.jpg')
+    image.make_public()
+    return image.public_url
+
+def upload_images(path="./static/images/"):
+    bucket = storage.bucket()
+    for image in os.listdir(path):
+        os.rename(path+image, path+image.lower())
+        image = image.lower()
+        if image.endswith('.jpg'):
+            blob = bucket.blob(image)
+            blob.upload_from_filename(path+image)

@@ -3,3 +3,4 @@ __pycache__/
 firebase_cred.json
 dburl.txt
 *.pyc
+storagebucket.txt
