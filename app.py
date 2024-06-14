@@ -1,13 +1,13 @@
 from flask import Flask, render_template, request, session, flash
 import folium
 import folium.plugins as plugins
-from jinja2 import Template
-from folium.map import Marker
 from geopy.distance import distance
 from math import radians, cos, sin, atan2, sqrt, degrees, ceil, floor
+from database_manager import check_cred, get_data, update_score
 
 app = Flask(__name__)
 app.secret_key = 'BAD_SECRET_KEY'
+user = ''
 
 locations = {'2357': [1.3428501826653902, 103.68000869738859], '1125': [1.354337, 103.684495], '3073': [1.3430637978922473, 103.68270773978031]
              , '5781': [1.3426374150718514, 103.68248648102774], '7320': [1.3543630333902696, 103.687998625503], '2232': [1.3445351444618483, 103.68029557491711]
@@ -29,7 +29,6 @@ def home():
 
 @app.route('/', methods =["POST"])
 def get_faction():
-    from database_manager import check_cred, get_data
     if request.method == "POST":
         user_name = request.form.get("f_name")
         password = request.form.get("pswd")
@@ -40,6 +39,9 @@ def get_faction():
             flash("Incorrect password or username already taken!", "error")
             return render_template("index.html")
         location_keys = list(locations.keys())
+        session['total_points'] = get_data()[user_name][1]
+        global user
+        user = user_name
         return render_template("difficulty.html", location_keys=location_keys)
 
 
@@ -59,8 +61,6 @@ def map(loc_code):
 
         # show the LongLat values on the location clicked on the map
         m.add_child(folium.LatLngPopup())
-
-
 
         m.get_root().width = "1000px"
         m.get_root().height = "600px"
@@ -112,6 +112,8 @@ def data(data):
 
     points_earned = ceil(1000/float(str(dist_btwn_locs)[:-2]))
     session['total_points'] += points_earned
+    update_score(user, session['total_points'])
+    
 
     dist_label = format(floor(dist_btwn_locs), 'd') + " m"
     attr = {'fill': '#000000', 'font-weight': 'bold', 'font-size': '15'}
