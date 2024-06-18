@@ -10,29 +10,24 @@ h3{
 }
 body{
     background-color: #e8e8e8;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
 #choice{
-    display: flex;
-    height: 100vh;
-    flex-direction: column;
-    display: block;
-    justify-content: center;
-    align-items: center;
     text-align: center;
-    margin-top: 10rem;
+    padding-top: 10rem;
+    flex: 1;
 }
 
 #login{
-    display: flex;
-    height: 100vh;
-    flex-direction: column;
-    display: block;
-    justify-content: center;
-    align-items: center;
     text-align: center;
-    margin-top: 10rem;
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+    flex: 1;
 }
 
 .cred_input input{
@@ -150,18 +145,16 @@ body{
 }
 
 .footer_logo{
-    position: absolute;
-    bottom: 0;
     width: 100vw;
     height: 50px;
     background-color: #F3E8DF;
 }
 
 #leaderboard{
-    overflow: auto;
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-grow: 1;
 }
 
 #leaderboard table{

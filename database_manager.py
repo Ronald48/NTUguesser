@@ -56,3 +56,7 @@ def upload_images(path="./static/images/"):
         if image.endswith('.jpg'):
             blob = bucket.blob(image)
             blob.upload_from_filename(path+image)
+            os.remove(path+image)
+
+if __name__ == "__main__":
+    upload_images("./NewPictures/")
