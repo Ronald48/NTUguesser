@@ -3,7 +3,7 @@ import folium
 import folium.plugins as plugins
 from geopy.distance import distance
 from math import radians, cos, sin, atan2, sqrt, degrees, ceil, floor
-from database_manager import check_cred, get_data, update_score, get_img_url
+from database_manager import check_cred, get_data, update_score, get_img_url, check_availability, create_user
 from csv_handler import get_loc_data
 
 app = Flask(__name__)
@@ -13,7 +13,9 @@ locations = get_loc_data()
 
 @app.route("/")
 def home():
-    if 'user' in session:
+    if 'user' not in session:
+        session['user'] = ''
+    if session['user'] != '':
         location_keys = list(locations.keys())
         return render_template("difficulty.html", location_keys=location_keys, user_name = session['user'].title())
     session['total_points'] = 0
@@ -27,14 +29,47 @@ def get_faction():
         if not user_name or not password:
             flash("Enter username and password", "error")
             return render_template("index.html")
-        if check_cred(user_name, password) == 0:
-            flash("Incorrect password or username already taken!", "error")
+        if check_cred(user_name, password) != 1:
+            flash("Incorrect password or username!", "error")
             return render_template("index.html")
         location_keys = list(locations.keys())
         session['total_points'] = get_data()[user_name][1]
         session['user'] = user_name
         return render_template("difficulty.html", location_keys=location_keys, user_name=session['user'].title())
 
+@app.route("/create_acc", methods=['GET', 'POST'])
+def create_account():
+    if request.method == "POST":
+        user_name = request.form.get("f_name")
+        password = request.form.get("pswd")
+        rep_password = request.form.get("r_pswd")
+        if not user_name:
+            flash("Enter username", "error")
+            return render_template("create_acc.html")
+        elif check_availability(user_name) == 0:
+            flash("Username not available!", "error")
+            return render_template("create_acc.html")
+        elif not password:
+            flash("Enter a password", "error")
+            return render_template("create_acc.html")
+        elif not rep_password:
+            flash("Repeat the new password", "error")
+            return render_template("create_acc.html")
+        elif password != rep_password:
+            flash("The passwords do not match", "error")
+            return render_template("create_acc.html")
+        else:
+            create_user(user_name, password)
+            location_keys = list(locations.keys())
+            session['total_points'] = get_data()[user_name][1]
+            session['user'] = user_name
+            return render_template("index.html", location_keys=location_keys, user_name=session['user'].title())
+    return render_template("create_acc.html")
+
+@app.route("/logout")
+def logout():
+    session["user"]=''
+    return render_template("index.html")
 
 @app.route("/map/<loc_code>", methods = ['POST', 'GET'])
 def map(loc_code):
@@ -160,4 +195,4 @@ def disp_leaders():
     for i in sorted_lst[::-1]:
         flash((i[0].title(), i[1]))
 
-    return render_template("leaderboard.html")
+    return render_template("leaderboard.html", log=session['user'])

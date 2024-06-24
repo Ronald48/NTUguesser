@@ -24,6 +24,13 @@ def create_user(user_name, pswd):
     encryptedPWD = hashlib.sha3_256(pswd).hexdigest()
     ref.update({user_name: [encryptedPWD, 0]})
 
+def check_availability(user_name):
+    user_dict = get_data()
+    if user_dict:
+        if user_name in user_dict:
+            return 0
+    return 1
+
 def check_cred(user_name, pswd):
     user_name = user_name.lower()
     user_dict = get_data()
@@ -35,7 +42,6 @@ def check_cred(user_name, pswd):
                 if encryptedPWD == user_dict[user][0]:
                     return 1
                 return 0
-    create_user(user_name, pswd)
     return 2
 
 def update_score(user_name, score):
