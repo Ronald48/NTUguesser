@@ -151,10 +151,15 @@ body{
     background-color: #F3E8DF;
 }
 
+#display{
+    display: flex;
+    flex-grow: 1;
+}
 #leaderboard{
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
     flex-grow: 1;
 }
 

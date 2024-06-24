@@ -15,6 +15,7 @@ locations = get_loc_data()
 def home():
     if 'user' not in session:
         session['user'] = ''
+        session['score'] = 0
     if session['user'] != '':
         location_keys = list(locations.keys())
         return render_template("difficulty.html", location_keys=location_keys, user_name = session['user'].title())
@@ -190,9 +191,7 @@ def disp_leaders():
     sorted_lst = []
     for i in user_info:
         sorted_lst.append((i, user_info[i][1]))
-    
-    sorted_lst.sort(key=lambda x: x[1])
-    for i in sorted_lst[::-1]:
-        flash((i[0].title(), i[1]))
 
-    return render_template("leaderboard.html", log=session['user'])
+    sorted_lst.sort(key=lambda x: x[1])
+
+    return render_template("leaderboard.html", log=session['user'], inf_score=sorted_lst[::-1], time_score=[("test1",0),("test2",0)])

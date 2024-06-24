@@ -34,25 +34,40 @@
                 {% endif %}
         </div>
     </nav>
-    <div id="leaderboard">
-        <table>
-            <tr>
-                <th>Username</th>
-                <th>Score</th>
-            </tr>
-                    {% with messages = get_flashed_messages() %}
-                        {% if messages %}
-                            {% for uname, score in messages %}
-                                <tr>
-                                    <td>{{uname}}</td>
-                                    <td>{{score}}</td>
-                                </tr>
-                            {% endfor %}
-                        {% endif %}
-                    {% endwith %}
-                {% endblock %}
-        </table>
+    <div id="display">
+        <div id="leaderboard">
+            <h1>Infinite Mode</h1>
+            <table>
+                <tr>
+                    <th>Username</th>
+                    <th>Score</th>
+                </tr>
+                    {% for uname, score in inf_score %}
+                        <tr>
+                            <td>{{uname}}</td>
+                            <td>{{score}}</td>
+                        </tr>
+                    {% endfor %}
+            </table>
+        </div>
+        <div id="leaderboard">
+            <h1>Time Trials</h1>
+            <table>
+                <tr>
+                    <th>Username</th>
+                    <th>Score</th>
+                </tr>
+                        {% for uname, score in time_score %}
+                            <tr>
+                                <td>{{uname}}</td>
+                                <td>{{score}}</td>
+                            </tr>
+                        {% endfor %}
+                    {% endblock %}
+            </table>
+        </div>
     </div>
+        
     <footer class="footer_logo">
         <span class="resize_text"></span>
     </footer>
