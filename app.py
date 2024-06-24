@@ -5,6 +5,7 @@ from geopy.distance import distance
 from math import radians, cos, sin, atan2, sqrt, degrees, ceil, floor
 from database_manager import check_cred, get_data, update_score, get_img_url, check_availability, create_user
 from csv_handler import get_loc_data
+from timeit import default_timer as timer 
 
 app = Flask(__name__)
 app.secret_key = 'BAD_SECRET_KEY'
@@ -17,8 +18,7 @@ def home():
         session['user'] = ''
         session['score'] = 0
     if session['user'] != '':
-        location_keys = list(locations.keys())
-        return render_template("difficulty.html", location_keys=location_keys, user_name = session['user'].title())
+        return render_template("game_mode.html", user_name=session['user'].title())
     session['total_points'] = 0
     return render_template("index.html")
 
@@ -33,10 +33,9 @@ def get_faction():
         if check_cred(user_name, password) != 1:
             flash("Incorrect password or username!", "error")
             return render_template("index.html")
-        location_keys = list(locations.keys())
         session['total_points'] = get_data()[user_name][1]
         session['user'] = user_name
-        return render_template("difficulty.html", location_keys=location_keys, user_name=session['user'].title())
+        return render_template("game_mode.html", user_name=session['user'].title())
 
 @app.route("/create_acc", methods=['GET', 'POST'])
 def create_account():
@@ -195,3 +194,13 @@ def disp_leaders():
     sorted_lst.sort(key=lambda x: x[1])
 
     return render_template("leaderboard.html", log=session['user'], inf_score=sorted_lst[::-1], time_score=[("test1",0),("test2",0)])
+
+@app.route("/inf")
+def inf_mode():
+    session["mode"] = 0
+    return render_template("difficulty.html", location_keys = list(locations.keys()))
+
+@app.route("/time")
+def time_mode():
+    session["mode"] = 1
+    return render_template("difficulty.html", location_keys = list(locations.keys()))

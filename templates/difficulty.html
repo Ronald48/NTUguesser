@@ -30,7 +30,6 @@
     </nav>
     <div id="choice">
         <div id="diff_btn">
-            <h1 style="margin-bottom: 2rem;">Welcome {{ user_name }}</h1>
             <h2>Choose Difficulty</h2>
             <button type="submit" onclick="get_photo()">Easy</button>
             <button type="submit" onclick="get_photo_hard()">HARD!</button>
@@ -50,7 +49,7 @@ function get_photo()
     var loc_indexes = {{location_keys|safe}}; // load the indexes of all the location photos
 
     let randomInt1 = Math.floor(Math.random() * (loc_indexes.length)); // pick a random number in the range of loc_indexes
-    window.location.href = window.location.href + "location_photo/" + loc_indexes[randomInt1]; // redirect to the location photo for the selected location code
+    window.location.href = "/location_photo/" + loc_indexes[randomInt1]; // redirect to the location photo for the selected location code
     
 };
 
@@ -60,7 +59,7 @@ function get_photo_hard()
     var loc_indexes = {{location_keys|safe}}; // load the indexes of all the location photos
 
     let randomInt2 = Math.floor(Math.random() * (loc_indexes.length)); // pick a random number in the range of loc_indexes
-    window.location.href = window.location.href + "location_photo/" + loc_indexes[randomInt2] + "/2"; // redirect to the location photo for the selected location code
+    window.location.href = "/location_photo/" + loc_indexes[randomInt2] + "/2"; // redirect to the location photo for the selected location code
     
 };
 
