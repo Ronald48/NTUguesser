@@ -12,14 +12,24 @@ app.secret_key = 'BAD_SECRET_KEY'
 
 locations = get_loc_data()
 
+
+def create_sesison(user_name):
+    data = get_data()
+    session['inf_points'] = data[user_name][1]
+    session['time_points'] = data[user_name][2]
+    session['session_score'] = 0
+    session['time_left'] = data[user_name][3]
+    session['user'] = user_name
+    
 @app.route("/")
 def home():
     if 'user' not in session:
         session['user'] = ''
         session['score'] = 0
     if session['user'] != '':
+        session['session_score'] = 0
+        session['time_left'] = 300
         return render_template("game_mode.html", user_name=session['user'].title())
-    session['total_points'] = 0
     return render_template("index.html")
 
 @app.route('/', methods =["POST"])
@@ -33,8 +43,7 @@ def get_faction():
         if check_cred(user_name, password) != 1:
             flash("Incorrect password or username!", "error")
             return render_template("index.html")
-        session['total_points'] = get_data()[user_name][1]
-        session['user'] = user_name
+        create_sesison(user_name)
         return render_template("game_mode.html", user_name=session['user'].title())
 
 @app.route("/create_acc", methods=['GET', 'POST'])
@@ -61,8 +70,7 @@ def create_account():
         else:
             create_user(user_name, password)
             location_keys = list(locations.keys())
-            session['total_points'] = get_data()[user_name][1]
-            session['user'] = user_name
+            create_sesison(user_name)
             return render_template("index.html", location_keys=location_keys, user_name=session['user'].title())
     return render_template("create_acc.html")
 
@@ -90,8 +98,9 @@ def map(loc_code):
         m.get_root().width = "1000px"
         m.get_root().height = "600px"
         map_iframe = m.get_root()._repr_html_()
-
-        return render_template("map.html", map_iframe=map_iframe, location_keys=location_keys, total_points=session['total_points'])
+        if session['mode'] == 0:
+            return render_template("map.html", map_iframe=map_iframe, location_keys=location_keys, total_points=session['inf_points'])
+        return render_template("map.html", map_iframe=map_iframe, location_keys=location_keys, total_points=session['session_score'])
     
 @app.route("/data", methods = ['POST', 'GET'])
 @app.route("/data/<data>", methods = ['POST', 'GET'])
@@ -100,7 +109,6 @@ def data(data):
     combined_data = data.split(",") # split the combined data into a list of the coordinates and the location code
     LatLong = combined_data[:-1] # extract the Lat-Long coordinates of the data
 
-    print(combined_data[2])
     # calculate the midpoint of the 2 selected coordinates
     dLon = radians(locations[combined_data[2]][1] - float(LatLong[1]))
 
@@ -136,9 +144,20 @@ def data(data):
     dist_btwn_locs = float(str(distance(locations[combined_data[2]], LatLong)*1000)[:-3])
 
     points_earned = ceil(1000/float(str(dist_btwn_locs)[:-2]))
-    session['total_points'] += points_earned
-    update_score(session['user'], session['total_points'])
-    
+
+    # Updating the score
+    session['session_score'] += points_earned
+
+    if session['mode'] == 0: # infinite run
+        session['inf_points'] += points_earned
+        update_score(session['user'], session['inf_points'], session['time_points'])
+
+    if session['mode'] == 1:
+        if session['time_points'] < session['session_score']: # only update the score if it's higher than high score
+            session['time_points'] = session['session_score']
+        if session['time_left'] <= 0:
+            update_score(session['user'], session['inf_points'], session['time_points'])
+            # display time over screen
 
     dist_label = format(floor(dist_btwn_locs), 'd') + " m"
     attr = {'fill': '#000000', 'font-weight': 'bold', 'font-size': '15'}
@@ -149,7 +168,7 @@ def data(data):
     map_iframe = m.get_root()._repr_html_()
 
     return render_template("map_holder.html", map_iframe=map_iframe, dist_label=dist_label, points_earned=points_earned)
-    # return m.get_root().render()
+
 
 @app.route("/location_photo/<loc_code>", methods = ['GET'])
 def location_photo(loc_code):
@@ -181,19 +200,19 @@ def map_hard(loc_code):
         m.get_root().height = "600px"
         map_iframe = m.get_root()._repr_html_()
 
-        return render_template("map_hard.html", map_iframe=map_iframe, location_keys=location_keys, total_points=session['total_points'])
-
+        if session['mode'] == 0:
+            return render_template("map.html", map_iframe=map_iframe, location_keys=location_keys, total_points=session['inf_points'])
+        return render_template("map.html", map_iframe=map_iframe, location_keys=location_keys, total_points=session['session_score'])
 
 @app.route("/leaderboard")
 def disp_leaders():
     user_info = get_data()
-    sorted_lst = []
-    for i in user_info:
-        sorted_lst.append((i, user_info[i][1]))
+    inf_scores = [(i, user_info[i][1]) for i in user_info]
+    time_scores = [(i, user_info[i][2]) for i in user_info]
 
-    sorted_lst.sort(key=lambda x: x[1])
-
-    return render_template("leaderboard.html", log=session['user'], inf_score=sorted_lst[::-1], time_score=[("test1",0),("test2",0)])
+    inf_scores.sort(key=lambda x: x[1])
+    time_scores.sort(key=lambda x: x[1])
+    return render_template("leaderboard.html", log=session['user'], inf_score=inf_scores[::-1], time_score=time_scores[::-1])
 
 @app.route("/inf")
 def inf_mode():

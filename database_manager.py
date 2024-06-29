@@ -22,7 +22,7 @@ def get_data():
 def create_user(user_name, pswd):
     pswd = bytes(pswd, 'utf-8')
     encryptedPWD = hashlib.sha3_256(pswd).hexdigest()
-    ref.update({user_name: [encryptedPWD, 0]})
+    ref.update({user_name: [encryptedPWD, 0, 0, 300]})
 
 def check_availability(user_name):
     user_dict = get_data()
@@ -44,9 +44,9 @@ def check_cred(user_name, pswd):
                 return 0
     return 2
 
-def update_score(user_name, score):
+def update_score(user_name, inf_score, time_score):
     pswd = ref.get()[user_name][0]
-    ref.update({user_name: [pswd, score]})
+    ref.update({user_name: [pswd, inf_score, time_score, 300]})
 
 def get_img_url(image_no):
     bucket = storage.bucket()
