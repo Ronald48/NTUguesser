@@ -96,8 +96,9 @@ timer_thread.start()
 # logout functionality for the site
 @app.route("/logout")
 def logout():
-    user_time_left[session["user"]] = 0
     if session["mode"] == 1: # only update the score if the game mode was time trials
+        if session["user"] in user_time_left:
+            user_time_left.pop(session["user"])
         if session["session_score"] > session["time_points"]:
             update_score(session['user'], session['inf_points'], session['session_score'])
     session["user"]=''
@@ -117,11 +118,12 @@ def location_photo(loc_code):
     url = get_img_url(loc_code)
     if session["user"] not in user_time_left:
         user_time_left[session["user"]] = session["time_left"]
-        
+
     if session['mode'] == 1:
         if user_time_left[session["user"]] <= 0:
             if session["session_score"] > session["time_points"]:
                 update_score(session['user'], session['inf_points'], session['session_score'])
+            user_time_left.pop(session["user"])
             return render_template("game_over.html")
         
     return render_template("location_photo.html", url=url, loc_code=loc_code, mode=session['mode'])
@@ -161,6 +163,7 @@ def location_photo_hard(loc_code):
         if user_time_left[session["user"]] <= 0:
             if session["session_score"] > session["time_points"]:
                 update_score(session['user'], session['inf_points'], session['session_score'])
+            user_time_left.pop(session["user"])
             return render_template("game_over.html")
             
     return render_template("location_photo_hard.html", url=url, loc_code=loc_code, mode=session['mode'])
