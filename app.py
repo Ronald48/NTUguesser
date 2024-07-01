@@ -20,7 +20,7 @@ def timer():
         if user_time_left:
             for user in user_time_left:
                 if user_time_left[user] > 0:
-                    user_time_left[user] -= 100
+                    user_time_left[user] -= 1
             time.sleep(1)
 
 # creating a background task for game timer
