@@ -7,6 +7,7 @@ from database_manager import check_cred, get_data, update_score, get_img_url, ch
 from csv_handler import get_loc_data
 import time
 import threading
+import sys
 
 app = Flask(__name__)
 app.secret_key = 'BAD_SECRET_KEY'
@@ -35,7 +36,7 @@ def home():
     return render_template("index.html")
 
 @app.route('/', methods =["POST"])
-def get_faction():
+def login():
     if request.method == "POST":
         user_name = request.form.get("f_name")
         password = request.form.get("pswd")
@@ -77,37 +78,52 @@ def create_account():
             return render_template("index.html", location_keys=location_keys, user_name=session['user'].title())
     return render_template("create_acc.html")
 
+# Handling the different game modes and difficulties
+user_time_left = {}
+
+def timer():
+    while True:
+        if user_time_left:
+            for user in user_time_left:
+                if user_time_left[user] > 0:
+                    user_time_left[user] -= 100
+            time.sleep(1)
+
+timer_thread = threading.Thread(target=timer)
+timer_thread.daemon = True
+timer_thread.start()
+
 # logout functionality for the site
 @app.route("/logout")
 def logout():
+    user_time_left[session["user"]] = 0
+    if session["mode"] == 1: # only update the score if the game mode was time trials
+        if session["session_score"] > session["time_points"]:
+            update_score(session['user'], session['inf_points'], session['session_score'])
     session["user"]=''
     return render_template("index.html")
 
-# Handling the different game modes and difficulties
-duration = 300
-th_list = []
 
-def timer():
-    global duration
-    while duration > 0:
-        time.sleep(1)
-        duration -= 1
-
+# update the remaining time for time trials game mode
 @app.route('/remaining_time')
 def remaining_time():
-    remaining_time_in_seconds = duration
+    remaining_time_in_seconds = user_time_left[session["user"]]
     return jsonify({'remaining_time_in_seconds': remaining_time_in_seconds})
 
 
 # Easy difficulty
 @app.route("/location_photo/<loc_code>", methods = ['GET'])
 def location_photo(loc_code):
-    global duration
     url = get_img_url(loc_code)
-    if not th_list:
-        timer_thread = threading.Thread(target=timer)
-        timer_thread.start()
-        th_list.append(1)
+    if session["user"] not in user_time_left:
+        user_time_left[session["user"]] = session["time_left"]
+        
+    if session['mode'] == 1:
+        if user_time_left[session["user"]] <= 0:
+            if session["session_score"] > session["time_points"]:
+                update_score(session['user'], session['inf_points'], session['session_score'])
+            return render_template("game_over.html")
+        
     return render_template("location_photo.html", url=url, loc_code=loc_code, mode=session['mode'])
 
 @app.route("/map/<loc_code>", methods = ['POST', 'GET'])
@@ -129,6 +145,7 @@ def map(loc_code):
         m.get_root().width = "1000px"
         m.get_root().height = "600px"
         map_iframe = m.get_root()._repr_html_()
+
         if session['mode'] == 0:
             return render_template("map.html", map_iframe=map_iframe, location_keys=location_keys, total_points=session['inf_points'], mode=session['mode'])
         return render_template("map.html", map_iframe=map_iframe, location_keys=location_keys, total_points=session['session_score'], mode=session['mode'])
@@ -137,6 +154,15 @@ def map(loc_code):
 @app.route("/location_photo/<loc_code>/2", methods = ['GET'])
 def location_photo_hard(loc_code):
     url = get_img_url(loc_code)
+    if session["user"] not in user_time_left:
+        user_time_left[session["user"]] = session["time_left"]
+    
+    if session['mode'] == 1:
+        if user_time_left[session["user"]] <= 0:
+            if session["session_score"] > session["time_points"]:
+                update_score(session['user'], session['inf_points'], session['session_score'])
+            return render_template("game_over.html")
+            
     return render_template("location_photo_hard.html", url=url, loc_code=loc_code, mode=session['mode'])
 
 
@@ -238,13 +264,6 @@ def data(data):
         session['inf_points'] += points_earned
         update_score(session['user'], session['inf_points'], session['time_points'])
 
-    if session['mode'] == 1:
-        if session['time_points'] < session['session_score']: # only update the score if it's higher than high score
-            session['time_points'] = session['session_score']
-        if session['time_left'] <= 0:
-            update_score(session['user'], session['inf_points'], session['time_points'])
-            # display time over screen
-
     dist_label = format(floor(dist_btwn_locs), 'd') + " m"
     attr = {'fill': '#000000', 'font-weight': 'bold', 'font-size': '15'}
     plugins.PolyLineTextPath(dist_line, dist_label, offset=-5, center=True, attributes=attr).add_to(m)
@@ -254,5 +273,3 @@ def data(data):
     map_iframe = m.get_root()._repr_html_()
 
     return render_template("map_holder.html", map_iframe=map_iframe, dist_label=dist_label, points_earned=points_earned)
-
-
