@@ -41,6 +41,7 @@ def create_sesison(user_name):
     session['session_score'] = 0
     session['time_left'] = data[user_name][3]
     session['user'] = user_name
+    session['mode'] = 2
 
 # code for home page - index.html 
 @app.route("/")
