@@ -202,8 +202,8 @@ def time_mode():
 @app.route("/leaderboard")
 def disp_leaders():
     user_info = get_data()
-    inf_scores = [(i, user_info[i][1]) for i in user_info]
-    time_scores = [(i, user_info[i][2]) for i in user_info]
+    inf_scores = [(i.title(), user_info[i][1]) for i in user_info]
+    time_scores = [(i.title(), user_info[i][2]) for i in user_info]
 
     inf_scores.sort(key=lambda x: x[1])
     time_scores.sort(key=lambda x: x[1])
