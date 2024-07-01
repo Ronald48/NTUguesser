@@ -6,7 +6,7 @@ from math import radians, cos, sin, atan2, sqrt, degrees, ceil, floor
 from database_manager import check_cred, get_data, update_score, get_img_url, check_availability, create_user
 from csv_handler import get_loc_data
 import time
-import threading
+from multiprocessing import Process
 
 app = Flask(__name__)
 app.secret_key = 'BAD_SECRET_KEY'
@@ -14,19 +14,24 @@ app.secret_key = 'BAD_SECRET_KEY'
 locations = get_loc_data()
 
 user_time_left = {}
+prev_time = time.time()
 
-def timer():
-    while True:
-        if user_time_left:
-            for user in user_time_left:
-                if user_time_left[user] > 0:
-                    user_time_left[user] -= 1
-            time.sleep(1)
+def reduce_time():
+    if user_time_left:
+        for user in user_time_left:
+            if user_time_left[user] > 0:
+                user_time_left[user] -= 1
 
-# creating a background task for game timer
-timer_thread = threading.Thread(target=timer)
-timer_thread.daemon = True
-timer_thread.start()
+
+# update the remaining time for time trials game mode
+@app.route('/remaining_time')
+def remaining_time():
+    global prev_time
+    if time.time() - prev_time >=1:  
+        reduce_time()
+        prev_time = time.time()
+    remaining_time_in_seconds = user_time_left[session["user"]]
+    return jsonify({'remaining_time_in_seconds': remaining_time_in_seconds})
 
 # creating session variables for new user instance
 def create_sesison(user_name):
@@ -104,19 +109,15 @@ def logout():
     session["user"]=''
     return render_template("index.html")
 
-
-# update the remaining time for time trials game mode
-@app.route('/remaining_time')
-def remaining_time():
-    remaining_time_in_seconds = user_time_left[session["user"]]
-    return jsonify({'remaining_time_in_seconds': remaining_time_in_seconds})
-
 # Easy difficulty
 @app.route("/location_photo/<loc_code>", methods = ['GET'])
 def location_photo(loc_code):
     url = get_img_url(loc_code)
     if session["user"] not in user_time_left:
         user_time_left[session["user"]] = session["time_left"]
+        print("CREATED")
+        print(user_time_left)
+        time.sleep(2)
 
     if session['mode'] == 1:
         if user_time_left[session["user"]] <= 0:
