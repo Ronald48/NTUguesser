@@ -7,12 +7,26 @@ from database_manager import check_cred, get_data, update_score, get_img_url, ch
 from csv_handler import get_loc_data
 import time
 import threading
-import sys
 
 app = Flask(__name__)
 app.secret_key = 'BAD_SECRET_KEY'
 
 locations = get_loc_data()
+
+user_time_left = {}
+
+def timer():
+    while True:
+        if user_time_left:
+            for user in user_time_left:
+                if user_time_left[user] > 0:
+                    user_time_left[user] -= 100
+            time.sleep(1)
+
+# creating a background task for game timer
+timer_thread = threading.Thread(target=timer)
+timer_thread.daemon = True
+timer_thread.start()
 
 # creating session variables for new user instance
 def create_sesison(user_name):
@@ -31,7 +45,8 @@ def home():
         session['score'] = 0
     if session['user'] != '':
         session['session_score'] = 0
-        session['time_left'] = 300
+        if session["user"] in user_time_left:
+            user_time_left.pop(session["user"])
         return render_template("game_mode.html", user_name=session['user'].title())
     return render_template("index.html")
 
@@ -78,21 +93,6 @@ def create_account():
             return render_template("index.html", location_keys=location_keys, user_name=session['user'].title())
     return render_template("create_acc.html")
 
-# Handling the different game modes and difficulties
-user_time_left = {}
-
-def timer():
-    while True:
-        if user_time_left:
-            for user in user_time_left:
-                if user_time_left[user] > 0:
-                    user_time_left[user] -= 100
-            time.sleep(1)
-
-timer_thread = threading.Thread(target=timer)
-timer_thread.daemon = True
-timer_thread.start()
-
 # logout functionality for the site
 @app.route("/logout")
 def logout():
@@ -111,7 +111,6 @@ def remaining_time():
     remaining_time_in_seconds = user_time_left[session["user"]]
     return jsonify({'remaining_time_in_seconds': remaining_time_in_seconds})
 
-
 # Easy difficulty
 @app.route("/location_photo/<loc_code>", methods = ['GET'])
 def location_photo(loc_code):
@@ -123,16 +122,13 @@ def location_photo(loc_code):
         if user_time_left[session["user"]] <= 0:
             if session["session_score"] > session["time_points"]:
                 update_score(session['user'], session['inf_points'], session['session_score'])
-            user_time_left.pop(session["user"])
-            return render_template("game_over.html")
+            return render_template("game_over.html", score=session["session_score"], high_score=session["session_score"] > session["time_points"])
         
     return render_template("location_photo.html", url=url, loc_code=loc_code, mode=session['mode'])
 
 @app.route("/map/<loc_code>", methods = ['POST', 'GET'])
 def map(loc_code):
     if request.method == 'GET':
-        name = request.form.get("f_name")
-
         location_keys = list(locations.keys())
 
         #set the iframe dimensions
@@ -163,8 +159,7 @@ def location_photo_hard(loc_code):
         if user_time_left[session["user"]] <= 0:
             if session["session_score"] > session["time_points"]:
                 update_score(session['user'], session['inf_points'], session['session_score'])
-            user_time_left.pop(session["user"])
-            return render_template("game_over.html")
+            return render_template("game_over.html", score=session["session_score"], high_score=session["session_score"] > session["time_points"])
             
     return render_template("location_photo_hard.html", url=url, loc_code=loc_code, mode=session['mode'])
 

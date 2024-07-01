@@ -66,6 +66,18 @@ body{
     padding: 0.2rem 0.6rem;
 }
 
+#new_game{
+    margin-bottom: 1.2rem;
+    background-color: #F3E8DF;
+    border: 1px solid #c99973;
+    border-radius: 5px;
+    height: 3rem;
+    font-size: 1.5rem;
+    width: 30rem;
+    justify-items: center;
+    padding: 0.2rem 0.6rem;
+}
+
 .center{
     display: flex;
     justify-content: center;

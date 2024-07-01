@@ -23,16 +23,26 @@
             <a href="/leaderboard">
                 <img class="leaderboard" src="/static/images/leaderboard.svg" width="50"/>
             </a>
-            <a href="/create_acc">
-                <img class="new_acc" src="/static/images/new_acc.svg" width="50">
+            <a href="/logout">
+                <img class="log_out" src="/static/images/logout.svg" width="50">
             </a>
         </div>
     </nav>
-    <div id="game_over">
-        <h1>GAME OVER</h1> 
+    <div style="display: flex; flex-direction: column; height: 80vh; justify-content: center; align-items: center; flex: 1;">
+        <h1>GAME OVER! You Scored {{ score }} Points!</h1>
+        {% block content %}
+            {% if high_score %}
+                <h1>This is your new HIGH SCORE</h1>
+            {% endif %}
+        {% endblock %}
+        <a href="/">
+            <button id="new_game">New Game</button>
+        </a>
     </div>
+
     <footer class="footer_logo">
         <span class="resize_text"></span>
     </footer>
+    
 </body>
 </html>
