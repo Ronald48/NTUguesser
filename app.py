@@ -115,9 +115,6 @@ def location_photo(loc_code):
     url = get_img_url(loc_code)
     if session["user"] not in user_time_left:
         user_time_left[session["user"]] = session["time_left"]
-        print("CREATED")
-        print(user_time_left)
-        time.sleep(2)
 
     if session['mode'] == 1:
         if user_time_left[session["user"]] <= 0:
