@@ -1,18 +1,19 @@
-from flask import Flask, render_template, request, session, flash
+from flask import Flask, render_template, request, session, flash, jsonify
 import folium
 import folium.plugins as plugins
 from geopy.distance import distance
 from math import radians, cos, sin, atan2, sqrt, degrees, ceil, floor
 from database_manager import check_cred, get_data, update_score, get_img_url, check_availability, create_user
 from csv_handler import get_loc_data
-from timeit import default_timer as timer 
+import time
+import threading
 
 app = Flask(__name__)
 app.secret_key = 'BAD_SECRET_KEY'
 
 locations = get_loc_data()
 
-
+# creating session variables for new user instance
 def create_sesison(user_name):
     data = get_data()
     session['inf_points'] = data[user_name][1]
@@ -20,7 +21,8 @@ def create_sesison(user_name):
     session['session_score'] = 0
     session['time_left'] = data[user_name][3]
     session['user'] = user_name
-    
+
+# code for home page - index.html 
 @app.route("/")
 def home():
     if 'user' not in session:
@@ -46,6 +48,7 @@ def get_faction():
         create_sesison(user_name)
         return render_template("game_mode.html", user_name=session['user'].title())
 
+# creating new user accounts and storing data in firebase database
 @app.route("/create_acc", methods=['GET', 'POST'])
 def create_account():
     if request.method == "POST":
@@ -74,10 +77,38 @@ def create_account():
             return render_template("index.html", location_keys=location_keys, user_name=session['user'].title())
     return render_template("create_acc.html")
 
+# logout functionality for the site
 @app.route("/logout")
 def logout():
     session["user"]=''
     return render_template("index.html")
+
+# Handling the different game modes and difficulties
+duration = 300
+th_list = []
+
+def timer():
+    global duration
+    while duration > 0:
+        time.sleep(1)
+        duration -= 1
+
+@app.route('/remaining_time')
+def remaining_time():
+    remaining_time_in_seconds = duration
+    return jsonify({'remaining_time_in_seconds': remaining_time_in_seconds})
+
+
+# Easy difficulty
+@app.route("/location_photo/<loc_code>", methods = ['GET'])
+def location_photo(loc_code):
+    global duration
+    url = get_img_url(loc_code)
+    if not th_list:
+        timer_thread = threading.Thread(target=timer)
+        timer_thread.start()
+        th_list.append(1)
+    return render_template("location_photo.html", url=url, loc_code=loc_code, mode=session['mode'])
 
 @app.route("/map/<loc_code>", methods = ['POST', 'GET'])
 def map(loc_code):
@@ -99,9 +130,64 @@ def map(loc_code):
         m.get_root().height = "600px"
         map_iframe = m.get_root()._repr_html_()
         if session['mode'] == 0:
+            return render_template("map.html", map_iframe=map_iframe, location_keys=location_keys, total_points=session['inf_points'], mode=session['mode'])
+        return render_template("map.html", map_iframe=map_iframe, location_keys=location_keys, total_points=session['session_score'], mode=session['mode'])
+
+# Hard difficulty
+@app.route("/location_photo/<loc_code>/2", methods = ['GET'])
+def location_photo_hard(loc_code):
+    url = get_img_url(loc_code)
+    return render_template("location_photo_hard.html", url=url, loc_code=loc_code, mode=session['mode'])
+
+
+@app.route("/map/<loc_code>/2", methods = ['POST', 'GET'])
+def map_hard(loc_code):
+    if request.method == 'GET':
+        location_keys = list(locations.keys())
+
+        #set the iframe dimensions
+        m = folium.Map(location=(1.348431, 103.683846), zoom_start=16, tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                        , attr='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community')
+        
+        # add a marker on the position clicked on the map
+        m.add_child(folium.ClickForMarker())
+
+        # show the LongLat values on the location clicked on the map
+        m.add_child(folium.LatLngPopup())
+
+        m.get_root().width = "1000px"
+        m.get_root().height = "600px"
+        map_iframe = m.get_root()._repr_html_()
+
+        if session['mode'] == 0:
             return render_template("map.html", map_iframe=map_iframe, location_keys=location_keys, total_points=session['inf_points'])
-        return render_template("map.html", map_iframe=map_iframe, location_keys=location_keys, total_points=session['session_score'])
-    
+        return render_template("map.html", map_iframe=map_iframe, location_keys=location_keys, total_points=session['session_score'], mode=session['mode'])
+
+
+# game mode selection
+@app.route("/inf")
+def inf_mode():
+    session["mode"] = 0
+    return render_template("difficulty.html", location_keys = list(locations.keys()))
+
+@app.route("/time")
+def time_mode():
+    session["mode"] = 1
+    return render_template("difficulty.html", location_keys = list(locations.keys()))
+
+# displays the game leaderboard with real time updates
+@app.route("/leaderboard")
+def disp_leaders():
+    user_info = get_data()
+    inf_scores = [(i, user_info[i][1]) for i in user_info]
+    time_scores = [(i, user_info[i][2]) for i in user_info]
+
+    inf_scores.sort(key=lambda x: x[1])
+    time_scores.sort(key=lambda x: x[1])
+    return render_template("leaderboard.html", log=session['user'], inf_score=inf_scores[::-1], time_score=time_scores[::-1])
+
+
+# calculating and updating user score based on the selected point  
 @app.route("/data", methods = ['POST', 'GET'])
 @app.route("/data/<data>", methods = ['POST', 'GET'])
 def data(data):
@@ -170,56 +256,3 @@ def data(data):
     return render_template("map_holder.html", map_iframe=map_iframe, dist_label=dist_label, points_earned=points_earned)
 
 
-@app.route("/location_photo/<loc_code>", methods = ['GET'])
-def location_photo(loc_code):
-    url = get_img_url(loc_code)
-    return render_template("location_photo.html", url=url, loc_code=loc_code)
-
-@app.route("/location_photo/<loc_code>/2", methods = ['GET'])
-def location_photo_hard(loc_code):
-    url = get_img_url(loc_code)
-    return render_template("location_photo_hard.html", url=url, loc_code=loc_code)
-
-
-@app.route("/map/<loc_code>/2", methods = ['POST', 'GET'])
-def map_hard(loc_code):
-    if request.method == 'GET':
-        location_keys = list(locations.keys())
-
-        #set the iframe dimensions
-        m = folium.Map(location=(1.348431, 103.683846), zoom_start=16, tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-                        , attr='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community')
-        
-        # add a marker on the position clicked on the map
-        m.add_child(folium.ClickForMarker())
-
-        # show the LongLat values on the location clicked on the map
-        m.add_child(folium.LatLngPopup())
-
-        m.get_root().width = "1000px"
-        m.get_root().height = "600px"
-        map_iframe = m.get_root()._repr_html_()
-
-        if session['mode'] == 0:
-            return render_template("map.html", map_iframe=map_iframe, location_keys=location_keys, total_points=session['inf_points'])
-        return render_template("map.html", map_iframe=map_iframe, location_keys=location_keys, total_points=session['session_score'])
-
-@app.route("/leaderboard")
-def disp_leaders():
-    user_info = get_data()
-    inf_scores = [(i, user_info[i][1]) for i in user_info]
-    time_scores = [(i, user_info[i][2]) for i in user_info]
-
-    inf_scores.sort(key=lambda x: x[1])
-    time_scores.sort(key=lambda x: x[1])
-    return render_template("leaderboard.html", log=session['user'], inf_score=inf_scores[::-1], time_score=time_scores[::-1])
-
-@app.route("/inf")
-def inf_mode():
-    session["mode"] = 0
-    return render_template("difficulty.html", location_keys = list(locations.keys()))
-
-@app.route("/time")
-def time_mode():
-    session["mode"] = 1
-    return render_template("difficulty.html", location_keys = list(locations.keys()))

@@ -19,6 +19,13 @@
             <img src="/static/images/globe.svg" width="50" style="padding-left:5px"/>
             <a class="p-2 navbar-brand" href="/">NTUguesser</a>
         </div>
+        {% block content %}
+            {% if mode %}
+                <div>
+                    <span id="remaining_time"></span>
+                </div>
+            {% endif %}
+        {% endblock %}
         <div class="nav_btn">
             <a href="/leaderboard">
                 <img class="leaderboard" src="/static/images/leaderboard.svg" width="50"/>
@@ -39,8 +46,21 @@
 
 </body>
 <script>
-document.getElementById('modalButton').onclick = function() {
-    $('#exampleModal').modal('toggle')
-}
+    function updateRemainingTime() {
+        fetch('/remaining_time')
+        .then(response => response.json())
+        .then(data => {
+            let minutes = Math.floor(data.remaining_time_in_seconds / 60);
+            let seconds = Math.floor(data.remaining_time_in_seconds % 60);
+            if (seconds < 10 && seconds >= 0) {
+                seconds = "0" + seconds;
+            }
+
+            let remainingTimeElement = document.getElementById("remaining_time");
+            remainingTimeElement.innerText = `Time Trials Remaining Time: ${minutes}:${seconds}`;
+
+        })
+    }
+    setInterval(updateRemainingTime, 500);
 </script>
 </html>
