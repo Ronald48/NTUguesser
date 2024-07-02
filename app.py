@@ -183,8 +183,8 @@ def map_hard(loc_code):
         map_iframe = m.get_root()._repr_html_()
 
         if session['mode'] == 0:
-            return render_template("map.html", map_iframe=map_iframe, location_keys=location_keys, total_points=session['inf_points'])
-        return render_template("map.html", map_iframe=map_iframe, location_keys=location_keys, total_points=session['session_score'], mode=session['mode'])
+            return render_template("map_hard.html", map_iframe=map_iframe, location_keys=location_keys, total_points=session['inf_points'])
+        return render_template("map_hard.html", map_iframe=map_iframe, location_keys=location_keys, total_points=session['session_score'], mode=session['mode'])
 
 
 # game mode selection
