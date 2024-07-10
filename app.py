@@ -6,7 +6,6 @@ from math import radians, cos, sin, atan2, sqrt, degrees, ceil, floor
 from database_manager import check_cred, get_data, update_score, get_img_url, check_availability, create_user
 from csv_handler import get_loc_data
 import time
-from multiprocessing import Process
 
 app = Flask(__name__)
 app.secret_key = 'BAD_SECRET_KEY'
@@ -24,6 +23,8 @@ def reduce_time():
 
 
 # update the remaining time for time trials game mode
+# do not use the threading moodule for updating time
+# pythonanywhere DOES NOT support threading
 @app.route('/remaining_time')
 def remaining_time():
     global prev_time
@@ -35,39 +36,53 @@ def remaining_time():
 
 # creating session variables for new user instance
 def create_sesison(user_name):
-    data = get_data()
+    data = get_data() # fetch the user data from firebase -> reffer to database_manager.py for more info
     session['inf_points'] = data[user_name][1]
     session['time_points'] = data[user_name][2]
     session['session_score'] = 0
-    session['time_left'] = data[user_name][3]
+    session['time_left'] = data[user_name][3] # Only used to start the timer
     session['user'] = user_name
     session['mode'] = 2
 
 # code for home page - index.html 
+# This is the first page that is shown when someone visits the site
 @app.route("/")
 def home():
+    # To avoid key error if the key 'user' is not in session
     if 'user' not in session:
         session['user'] = ''
         session['score'] = 0
+    # If the user has already logged-in, redirect them to the game mode selection page
     if session['user'] != '':
+        # Reset the session score to make sure the previous score does not app up
         session['session_score'] = 0
         if session["user"] in user_time_left:
             user_time_left.pop(session["user"])
         return render_template("game_mode.html", user_name=session['user'].title())
+    # If the user is not logged-in redirect them to the login page
     return render_template("index.html")
 
+# This is the function that logs in the user
 @app.route('/', methods =["POST"])
 def login():
+    # using the POST method to get the info filled in by the user on the login page
     if request.method == "POST":
+        # f_name and pswd are the names of the input tags on the login page
         user_name = request.form.get("f_name")
         password = request.form.get("pswd")
+        # Checking if both user name and passwords are filled by the user
         if not user_name or not password:
             flash("Enter username and password", "error")
             return render_template("index.html")
+        # Reffer to database_manager.py for check_cred
+        # check_cred will return 1 if the user name and password match the ones in the database
+        # if the user name and passwords do not match, the logn page flashes the error
         if check_cred(user_name, password) != 1:
             flash("Incorrect password or username!", "error")
             return render_template("index.html")
+        # Create all the keys in the flask session
         create_sesison(user_name)
+        # Redirect the user to the select game mode screen after login
         return render_template("game_mode.html", user_name=session['user'].title())
 
 # creating new user accounts and storing data in firebase database
@@ -102,12 +117,17 @@ def create_account():
 # logout functionality for the site
 @app.route("/logout")
 def logout():
-    if session["mode"] == 1: # only update the score if the game mode was time trials
+    # only update the score if the game mode was time trials
+    # the score is automatically updated for infinite run
+    if session["mode"] == 1:
+        # remove the user info from flask session
         if session["user"] in user_time_left:
             user_time_left.pop(session["user"])
+        # only update time trials score if it is grater than the PB
         if session["session_score"] > session["time_points"]:
             update_score(session['user'], session['inf_points'], session['session_score'])
     session["user"]=''
+    # Redirect to login screen
     return render_template("index.html")
 
 # Easy difficulty
