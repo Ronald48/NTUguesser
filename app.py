@@ -130,6 +130,21 @@ def logout():
     # Redirect to login screen
     return render_template("index.html")
 
+
+# game mode selection
+@app.route("/inf")
+def inf_mode():
+    session["mode"] = 0
+    return render_template("difficulty.html", location_keys = list(locations.keys()))
+
+@app.route("/time")
+def time_mode():
+    session["mode"] = 1
+    return render_template("difficulty.html", location_keys = list(locations.keys()))
+
+
+# Difficulty selection
+
 # Easy difficulty
 @app.route("/location_photo/<loc_code>", methods = ['GET'])
 def location_photo(loc_code):
@@ -207,21 +222,10 @@ def map_hard(loc_code):
         return render_template("map_hard.html", map_iframe=map_iframe, location_keys=location_keys, total_points=session['session_score'], mode=session['mode'])
 
 
-# game mode selection
-@app.route("/inf")
-def inf_mode():
-    session["mode"] = 0
-    return render_template("difficulty.html", location_keys = list(locations.keys()))
-
-@app.route("/time")
-def time_mode():
-    session["mode"] = 1
-    return render_template("difficulty.html", location_keys = list(locations.keys()))
-
 # displays the game leaderboard with real time updates
 @app.route("/leaderboard")
 def disp_leaders():
-    user_info = get_data()
+    user_info = get_data() # gets the data in real time
     inf_scores = [(i.title(), user_info[i][1]) for i in user_info]
     time_scores = [(i.title(), user_info[i][2]) for i in user_info]
 
