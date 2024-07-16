@@ -6,6 +6,7 @@ from math import radians, cos, sin, atan2, sqrt, degrees, ceil, floor
 from database_manager import check_cred, get_data, update_score, get_img_url, check_availability, create_user
 from csv_handler import get_loc_data
 import time
+import random
 
 app = Flask(__name__)
 app.secret_key = 'BAD_SECRET_KEY'
@@ -135,20 +136,24 @@ def logout():
 @app.route("/inf")
 def inf_mode():
     session["mode"] = 0
-    return render_template("difficulty.html", location_keys = list(locations.keys()))
+    return render_template("difficulty.html")
 
 @app.route("/time")
 def time_mode():
     session["mode"] = 1
-    return render_template("difficulty.html", location_keys = list(locations.keys()))
+    return render_template("difficulty.html")
 
 
 # Difficulty selection
 
 # Easy difficulty
-@app.route("/location_photo/<loc_code>", methods = ['GET'])
-def location_photo(loc_code):
+
+@app.route("/map/next_loc")
+def next_img():
+    location_keys = list(locations.keys())
+    loc_code = location_keys[random.randint(0, len(location_keys)-1)]
     url = get_img_url(loc_code)
+    
     if session["user"] not in user_time_left:
         user_time_left[session["user"]] = session["time_left"]
 
@@ -157,8 +162,8 @@ def location_photo(loc_code):
             if session["session_score"] > session["time_points"]:
                 update_score(session['user'], session['inf_points'], session['session_score'])
             return render_template("game_over.html", score=session["session_score"], high_score=session["session_score"] > session["time_points"])
-        
-    return render_template("location_photo.html", url=url, loc_code=loc_code, mode=session['mode'])
+
+    return render_template(f"location_photo.html", url=url, loc_code=loc_code, mode=session['mode'])
 
 @app.route("/map/<loc_code>", methods = ['POST', 'GET'])
 def map(loc_code):
@@ -183,9 +188,13 @@ def map(loc_code):
         return render_template("map.html", map_iframe=map_iframe, location_keys=location_keys, total_points=session['session_score'], mode=session['mode'])
 
 # Hard difficulty
-@app.route("/location_photo/<loc_code>/2", methods = ['GET'])
-def location_photo_hard(loc_code):
+
+@app.route("/map_hard/next_loc")
+def next_img_hard():
+    location_keys = list(locations.keys())
+    loc_code = location_keys[random.randint(0, len(location_keys)-1)]
     url = get_img_url(loc_code)
+    
     if session["user"] not in user_time_left:
         user_time_left[session["user"]] = session["time_left"]
     
@@ -194,8 +203,8 @@ def location_photo_hard(loc_code):
             if session["session_score"] > session["time_points"]:
                 update_score(session['user'], session['inf_points'], session['session_score'])
             return render_template("game_over.html", score=session["session_score"], high_score=session["session_score"] > session["time_points"])
-            
-    return render_template("location_photo_hard.html", url=url, loc_code=loc_code, mode=session['mode'])
+
+    return render_template(f"location_photo_hard.html", url=url, loc_code=loc_code, mode=session['mode'])
 
 
 @app.route("/map/<loc_code>/2", methods = ['POST', 'GET'])

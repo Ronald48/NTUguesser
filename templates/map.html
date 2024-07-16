@@ -38,7 +38,9 @@
     <h2>current points: {{ total_points }}</h2>
     <div class="container" style="display: flex; flex-direction: column; height: 80vh; justify-content: center; align-items: center; flex: 1;">
         {{ map_iframe | safe}}
-        <button class="btn btn-primary p-2 bg-purepink m-2" onclick=get_photo()>Next</button>
+        <a href="/map/next_loc">
+            <button class="btn btn-primary p-2 bg-purepink m-2">Next</button>
+        </a>
     </div>
     
     
@@ -56,7 +58,16 @@
 </body>
 <script>
 
-function updateRemainingTime() {
+    var url_route = window.location.href.split("/");
+    document.getElementById("current_url").value = url_route[4];
+
+    console.log(url_route);
+    
+    function sendData(){
+        console.log(document.getElementById("latitude").value)
+    }
+
+    function updateRemainingTime() {
         fetch('/remaining_time')
         .then(response => response.json())
         .then(data => {
@@ -71,29 +82,6 @@ function updateRemainingTime() {
 
         })
     }
-    setInterval(updateRemainingTime, 500);
-
-    
-    var url_route = window.location.href.split("/");
-    document.getElementById("current_url").value = url_route[4];
-    
-    document.getElementById("longitude").innerHTML = e.latlng.lng.toFixed(4);
-    document.getElementById("latitude").value = e.latlng.lat.toFixed(4);
-    
-    function sendData(){
-        console.log(document.getElementById("latitude").value)
-    }
-    
-    function get_photo()
-    {
-    // var test = "{{ test_var }}";
-    // console.log(test)
-
-    var loc_indexes = {{location_keys|safe}}; // load the indexes of all the location photos
-
-    let randomInt1 = Math.floor(Math.random() * (loc_indexes.length)); // pick a random number in the range of loc_indexes
-    window.location = "/location_photo/" + loc_indexes[randomInt1]; // redirect to the location photo for the selected location code
-    
-    };
+    setInterval(updateRemainingTime, 500);    
 </script>
 </html>

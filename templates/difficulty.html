@@ -31,37 +31,16 @@
     <div id="choice">
         <div id="diff_btn">
             <h2>Choose Difficulty</h2>
-            <button type="submit" onclick="get_photo()">Easy</button>
-            <button type="submit" onclick="get_photo_hard()">HARD!</button>
+            <a href="/map/next_loc">
+                <button>Easy</button>
+            </a>
+            <a href="/map_hard/next_loc">
+                <button>HARD!</button>
+            </a>
         </div>
     </div>
     <footer class="footer_logo">
         <span class="resize_text"></span>
     </footer>
-    {% set test_var = location_keys %}
 </body>
-<script>
-
-// randomly pick a location and redirect the user
-function get_photo()
-{
-
-    var loc_indexes = {{location_keys|safe}}; // load the indexes of all the location photos
-
-    let randomInt1 = Math.floor(Math.random() * (loc_indexes.length)); // pick a random number in the range of loc_indexes
-    window.location.href = "/location_photo/" + loc_indexes[randomInt1]; // redirect to the location photo for the selected location code
-    
-};
-
-function get_photo_hard()
-{
-
-    var loc_indexes = {{location_keys|safe}}; // load the indexes of all the location photos
-
-    let randomInt2 = Math.floor(Math.random() * (loc_indexes.length)); // pick a random number in the range of loc_indexes
-    window.location.href = "/location_photo/" + loc_indexes[randomInt2] + "/2"; // redirect to the location photo for the selected location code
-    
-};
-
-</script>
 </html>
