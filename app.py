@@ -171,7 +171,14 @@ def map(loc_code):
         location_keys = list(locations.keys())
 
         #set the iframe dimensions
-        m = folium.Map(location=(1.348431, 103.683846), zoom_start=16)
+        m = folium.Map(location=(1.348431, 103.683846), 
+                       min_lon=103.67282867431642,
+                       max_lon=103.69179725646974,
+                       min_lat=1.338021715478541,
+                       max_lat=1.3586582803536342,
+                       max_bounds=True,
+                       zoom_start=16)
+
         
         # add a marker on the position clicked on the map
         m.add_child(folium.ClickForMarker())
@@ -194,7 +201,7 @@ def next_img_hard():
     location_keys = list(locations.keys())
     loc_code = location_keys[random.randint(0, len(location_keys)-1)]
     url = get_img_url(loc_code)
-    
+
     if session["user"] not in user_time_left:
         user_time_left[session["user"]] = session["time_left"]
     
@@ -213,9 +220,16 @@ def map_hard(loc_code):
         location_keys = list(locations.keys())
 
         #set the iframe dimensions
-        m = folium.Map(location=(1.348431, 103.683846), zoom_start=16, tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-                        , attr='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community')
-        
+        m = folium.Map(location=(1.348431, 103.683846), 
+                       min_lon=103.67282867431642,
+                       max_lon=103.69179725646974,
+                       min_lat=1.338021715478541,
+                       max_lat=1.3586582803536342,
+                       max_bounds=True,
+                       zoom_start=16,
+                       tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", 
+                       attr='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community')
+
         # add a marker on the position clicked on the map
         m.add_child(folium.ClickForMarker())
 
