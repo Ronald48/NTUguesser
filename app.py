@@ -299,7 +299,14 @@ def data(data):
     
     dist_btwn_locs = float(str(distance(locations[combined_data[2]], LatLong)*1000)[:-3])
 
-    points_earned = ceil(1000/float(str(dist_btwn_locs)[:-2]))
+    max_pts = 1000
+
+    if 0 < dist_btwn_locs <= 5:
+        points_earned = max_pts
+    elif 5 < dist_btwn_locs <= 20:
+        points_earned = ceil(5*max_pts/dist_btwn_locs)
+    else:
+        points_earned = ceil(max_pts/dist_btwn_locs)
 
     # Updating the score
     session['session_score'] += points_earned
@@ -308,7 +315,7 @@ def data(data):
         session['inf_points'] += points_earned
         update_score(session['user'], session['inf_points'], session['time_points'])
 
-    dist_label = format(floor(dist_btwn_locs), 'd') + " m"
+    dist_label = format(ceil(dist_btwn_locs), 'd') + " m"
     attr = {'fill': '#000000', 'font-weight': 'bold', 'font-size': '15'}
     plugins.PolyLineTextPath(dist_line, dist_label, offset=-5, center=True, attributes=attr).add_to(m)
 

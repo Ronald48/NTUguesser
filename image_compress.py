@@ -11,11 +11,11 @@ with open("storagebucket.txt", 'r') as file:
 
 firebase_admin.initialize_app(cred, {'storageBucket': store_bkt})
 
-"""def download_images(path="photos"):
+def download_images(path="photos"):
     import csv_handler
     locs = list(csv_handler.get_loc_data().keys())
-    print(locs)
-    print(len(locs))
+    print(locs) #get the names of all the files in the storage bucket
+    print(len(locs)) # Number of files in the bucket
     bucket = storage.bucket()
     for img in locs:
         blob_name = f"{img}.jpg"
@@ -25,14 +25,15 @@ firebase_admin.initialize_app(cred, {'storageBucket': store_bkt})
 
         blob = bucket.blob(blob_name)
         blob.download_to_filename(destination_file)
-        blob.delete()"""
+        blob.delete()
         
 def resize(path="photos", remove=False):
     for img in os.listdir(path):
-        with Image.open(f"{path}/{img}") as image:
-            ImageOps.exif_transpose(image, in_place=True)
-            resized = image.resize((500,500), 4)
-            resized.save(f"resized/{img}")
+        if img:
+            with Image.open(f"{path}/{img}") as image:
+                ImageOps.exif_transpose(image, in_place=True)
+                resized = image.resize((500,500), 4)
+                resized.save(f"resized/{img}")
     if remove:
         for i in os.listdir(path):
             os.remove(f"{path}/{i}")
@@ -49,7 +50,7 @@ def upload_images(path):
             blob.upload_from_filename(path+image)
 
 if __name__ == "__main__":
-    resize("photos")
+    resize()
     inp = input("Do you want to upload the images y/n >>> ")
     if inp in ('y', 'Y'):
         upload_images("resized/")
